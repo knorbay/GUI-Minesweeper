@@ -21,11 +21,11 @@ total_mines = 0
 opened_count = 0
 def get_difficulty_name():
     if size == 8:
-        return "Kolay"
+        return "Easy"
     elif size == 12:
-        return "Orta"
+        return "Medium"
     else:
-        return "Zor"
+        return "Hard"
 def set_difficulty(new_size):
     global size
     size = new_size 
