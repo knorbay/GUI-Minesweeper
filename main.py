@@ -1,6 +1,15 @@
 import tkinter as tk
 import random
+import subprocess
+import os
 from PIL import Image, ImageTk
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+def play_sound(relative_path, volume=0.3):
+    sound_path = os.path.join(BASE_DIR, relative_path)
+    if os.path.exists(sound_path):
+        subprocess.Popen(["afplay", "-v", str(volume), sound_path])
+    else:
+        print(f"Sound dosent exits: {sound_path}")
 size = 8
 NUMBER_COLORS = [
     "",
@@ -69,6 +78,9 @@ def click(event):
     col = (event.x - OFFSET_X) // CELL_SIZE
     row = (event.y - OFFSET_Y) // CELL_SIZE
     if 0 <= col < size and 0 <= row < size:
+        if not opened[row][col] and not flags[row][col]:
+            if board[row][col] != -1:
+                play_sound("assets/sounds/opencell_sound.mp3", volume=0.4)
         opencell(col, row)
 def opencell(col, row):
     global opened_count, game_active
@@ -120,6 +132,7 @@ def draw_flag(row, col):
     canvas.delete(f"flag_{row}_{col}")
 
     if flags[row][col]:
+        play_sound("assets/sounds/flag_sound.mp3",volume=0.2)
         canvas.create_image(
             x,
             y,
@@ -150,7 +163,8 @@ def reveal_all_mines():
 
             if board[r][c] == -1 and not opened[r][c]:
                 mines.append((r, c))
-
+    if mines:
+        window.after(250, lambda: reveal_next_mine(mines, 0))
     reveal_next_mine(mines, 0)
 def reveal_next_mine(mines, index):
 
@@ -160,9 +174,10 @@ def reveal_next_mine(mines, index):
     opened[r][c] = True
     draw_cell(r, c)
     show_explosion(r, c)
-
+    if index % 2 == 0:
+        play_sound("assets/sounds/explosion.mp3", volume=0.4)
     window.after(
-        90,
+        120,
         lambda: reveal_next_mine(mines, index + 1)
     )
 def place_mines(minesplaced, board):
